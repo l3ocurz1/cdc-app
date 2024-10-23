@@ -25,3 +25,131 @@ body {
     text-wrap: balance;
   }
 }
+
+
+.console {
+  z-index: 999;
+  position: fixed;
+
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 30vh);
+  border-radius: .75rem
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 100;
+  }
+}
+ 
+@keyframes fade-out {
+  from {
+    opacity: 100;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.console-message {
+  opacity: 0;
+}
+
+.fade-in {
+  animation: fade-in 4s;
+  animation-fill-mode: forwards;
+}
+
+.fade-out {
+  animation: fade-out 10s ease-out;
+  animation-fill-mode: forwards;
+}
+
+.button.upload {
+  border: none;
+  box-shadow: none;
+  border-radius: .75rem;
+}
+
+.message {
+  height: 26px !important;
+  font-size: 1.0625rem;
+  line-height: 1.625rem;
+  font-variation-settings: "opsz" 40, "wght" 410;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+#autoTextarea {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Nasconde la barra di scorrimento */
+  resize: none; /* Impedisce il ridimensionamento manuale */
+}
+
+.textarea-console {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  resize: both;
+  min-height: 40px;
+  line-height: 20px;
+
+  min-width: 400px;
+  max-width: 80%;
+  height: 26px!important;
+}
+
+.textarea-console[contenteditable]:empty::before {
+  content: "Placeholder still possible";
+  color: gray;
+  min-width: 400px;
+  max-width: 90%;
+  height: 26px!important;
+}
+
+.c-icon.is-visible {
+  animation: anim .2s ease-in-out;
+}
+
+@keyframes anim {
+0% {
+  display: none;
+  opacity: 0;
+}
+50% {
+  opacity: 0;
+}
+100% {
+  opacity: 1;
+}
+}
+
+.is-visible {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 2s linear;
+}
+
+.is-invisible {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 2s, opacity 2s linear;
+}
+
+.m-auto {
+  margin: auto;
+}
+
+.info-file {
+  padding: 0;
+  transition: padding 200ms;
+}
+
+.info-file.p32 {
+  padding-bottom: 20px;
+}

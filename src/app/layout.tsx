@@ -25,6 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <link precedence="default" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"></link>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
