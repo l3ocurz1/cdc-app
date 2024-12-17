@@ -5,6 +5,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary: #a0abff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -12,6 +13,10 @@
     --background: #0a0a0a;
     --foreground: #ededed;
   }
+}
+
+.is-primary-color {
+  color: var(--primary)!important;
 }
 
 body {
@@ -31,7 +36,7 @@ body {
   z-index: 999;
   position: fixed;
 
-  top: 50%;
+  top: 40%;
   left: 50%;
   transform: translate(-50%, 30vh);
   border-radius: .75rem
@@ -147,9 +152,30 @@ body {
 
 .info-file {
   padding: 0;
-  transition: padding 200ms;
+  transition: padding 500ms;
 }
 
 .info-file.p32 {
   padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+.box.agent {
+  background-color: #f9faff!important;
+}
+
+.footer {
+  padding: 1.2em;
+  text-align: left;
+  font-size: 1em;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.dialog-right {
+  width: fit-content;
+  margin-left: auto!important;
+  text-align: right!important;
 }

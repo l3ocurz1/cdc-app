@@ -3,56 +3,48 @@
 import importIcon from '../img/import_icon.svg';
 import enterIcon from '../img/enter_icon.svg';
 import { useEffect, useState } from 'react';
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { Puff } from "react-loader-spinner";
 
-export default function Console({set}) {
+import Slider from './slider';
+import { debug } from 'console';
 
-  const CLASS_FADE_IN = "fade-in";
-  const CLASS_FADE_OUT = "fade-out";
+export default function Console({set, isLoading, setIsLoading, file, setFile}) {
+
   let prompt = {
     "message": "Quali sono le tecnologie in uso in questo progetto e qual è il livello necessario per poterci lavorare?",
-    "directive": "Dammi il risultato come elenco puntato formattato per inserirlo in una pagina html."
+    "directive": "Crea un elenco puntato e formattato da inserire in una pagina html."
   }
 
-  const [file, setFile] = useState<string>();
+  let commands = {
+    "project_type": { "message": "A quale tipologia di progetto può riferirsi questo file? Richiede una figura backend o frontend e di che livello?", directive: "Individua la tipologia progettuale"},
+    "required_comp": { "message": "Riportami le competenze tecniche necessarie per poter lavorare con queste tecnologie e stima un livello.", directive: "Individua competenze" },
+    "vulnerability": { "message": "Riporta per quali librerie esistono vulnerabilità note sul database CVE e riporta il livello di rischio e l'ID della vulnerabilità in una lista ordinata.", directive: "Ricerca vulnerabilità sul software" },
+  }
+
+  
   const [fileName, setFileName] = useState<string>();
   const [fileEnter, setFileEnter] = useState(false);
-  const [parameter, setParam] = useState(50);
-  const [uMessage, setUMessage] = useState<string>();
+  const [temperature, setTemperature] = useState(0.3);
+  const [uMessage, setUMessage] = useState<string>("project_type");
   const [aMessage, setAMessage] = useState<string>();
   const [sequence, setSequence] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-
-
-  function fadeIn() {
-    const consoleEl = document.querySelector(".console-message")
-    consoleEl?.classList.remove(CLASS_FADE_OUT);
-    consoleEl?.classList.add(CLASS_FADE_IN);
-    
-  }
-
-  function fadeOut() {
-    const consoleEl = document.querySelector(".console-message")
-    consoleEl?.classList.add(CLASS_FADE_OUT);
-    consoleEl?.classList.remove(CLASS_FADE_IN);
-  }
+  const [isOptionVisible, setOptionVisible] = useState(false);
+  const [optionMessage, setOptionMessage] = useState<string>("More");
 
   let formData = new FormData();
 
   async function elaborate() {
     if (sequence > 1) {
-      set({"content": uMessage, "sequence": sequence, "role": "user"})
+      set({"content": commands[uMessage].directive, "sequence": sequence, "role": "user"})
     } else {
-      console.log("message", uMessage);
-      console.log("parameter", parameter)
-      set({"content": uMessage? uMessage : prompt.message , "sequence": sequence, "role": "user"})
+      console.log("message", commands[uMessage].directive);
+      console.log("parameter", temperature)
+      set({"content": commands[uMessage].directive , "sequence": sequence, "role": "user"})
     }
     try {
       setIsLoading(true);
       formData.append("file", file, file.name);
-      formData.set("user_message", prompt.message + " " + prompt.directive + " " + uMessage)
-      formData.set("param1", String(parameter))
+      formData.set("user_message", commands[uMessage].message + " " + prompt.directive)
+      formData.set("user_temperature", temperature)
 
       await fetch("http://localhost:7071/api/http_trigger", {
         method: 'POST',
@@ -79,6 +71,12 @@ export default function Console({set}) {
     setFileName(file.name);
     set({ content: `${file.name} uploaded`, sequence, role: 'system' });
 
+  }
+
+  function toggleOptions() {
+    setOptionVisible(!isOptionVisible);
+    if (optionMessage == "More") { setOptionMessage("Less"); }
+    else setOptionMessage("More");
   }
 
   return (
@@ -111,41 +109,32 @@ export default function Console({set}) {
       }}
       >
       <div className="box">
-{/*       <div className={`info-file ${fileName != undefined ? 'p32' : ''}`}>
-          { fileName ? (
-            <div>{fileName} <span className="tag is-warning is-light">JSON</span>
-            </div>) : <></> 
-          } 
-      </div> */}
-      {fileName ? (<div className="level is-mobile">
-        <label>Creatività Risposta</label>
-        <div className="flex items-center space-x-2">
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={parameter}
-            onChange={(e) => setParam(e.target.value)}
-            className="w-full h-1 bg-gray-300 rounded appearance-none cursor-pointer"
-          />
-          <span className="text-gray-800 text-xs">{parameter}</span>
-        </div>
-      </div>) : <></>
-       }
-       <div className="level is-mobile">
+{       <div className={`info-file ${isOptionVisible != false ? 'p32' : ''}`}>
+          {isOptionVisible ? (
+            <div className="flex is-align-items-center">
+              <div className="is-flex is-flex-grow-1"><label className='mr-3'>Creatività</label><span className='tag is-light'>{temperature}</span></div>
+              <div className="is-flex-grow-3">
+                <Slider temperature={temperature} setTemperature={setTemperature}></Slider>
+              </div>
+            </div>
+              ) : <></>
+          }
+        </div>}
+      
+       <div className="level is-mobile is-align-items-flex-start">
           <div className="level-item">
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => document.getElementById('fileInput')?.click()}>
+            <button className="button is-link" onClick={() => document.getElementById('fileInput')?.click()}>
               <span>Upload File</span>
             </button>
             <input id="fileInput" type="file" onChange={(e) => uploadFile(e)} style={{ display: 'none' }} />
           </div>
           <div className="level-item">
+            <div className="is-flex is-flex-direction-column is-align-items-center">
             <div className="control">
-            <select className="input textarea-console" onChange={(e) => setUMessage(e.target.value)}>
-                <option value="">Seleziona un opzione</option>
-                <option value="Analizza il file">Analizza il file</option>
-                <option value="Dimmi che tipo di progetto è">Dimmi che tipo di progetto è</option>
-                <option value="Tecnologie Utilizzate">Tecnologie Utilizzate</option>
+            <select className="input textarea-console" onChange={(e) => setUMessage(e.target.value)} >
+                <option value="project_type">{commands["project_type"].directive}</option>
+                <option value="required_comp">{commands["required_comp"].directive}</option>
+                <option value="vulnerability">{commands["vulnerability"].directive}</option>
               </select>
 {/*               <input className="input textarea-console" placeholder="Message" role="textbox" contentEditable="true" 
                 onKeyDown={ (e) => {
@@ -156,20 +145,21 @@ export default function Console({set}) {
                 <img className={`c-icon ${ uMessage != "" ? "is-visible" : "is-invisible"}`} src={enterIcon.src} height="18" width="18"/>
               </span> */}
             </div>
+            <div className="mt-3">
+              <span className='is-size-6 has-text-grey is-underlined is-clickable' onClick={() => toggleOptions()}>{optionMessage} options</span>
+            </div>
+            </div>
+
           </div>
-          <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+
+          <div className="level-item">
+          <button type="button" className="button is-link text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
            onClick={elaborate} disabled={!file}>
               <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
                 <path stroke="currentColor" d="M1 5h12m0 0L9 1m4 4L9 9"/>
               </svg>
-              <span className="sr-only">Icon description</span>
+              <span className="sr-only"></span>
           </button>
-          <div className="level-item">
-          <Puff 
-            height="32"
-            width="32"
-            wrapperClass={`m-auto ${isLoading ? '': 'is-invisible'}`}
-            />
           </div>
         </div>
       </div>
